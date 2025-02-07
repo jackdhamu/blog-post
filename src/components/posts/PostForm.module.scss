@@ -1,0 +1,25 @@
+.formContainer {
+  max-width: 600px;
+  margin: 24px auto;
+  padding: 0 16px;
+
+  :global {
+    .ant-card-head-title {
+      font-size: 20px;
+      text-align: center;
+    }
+  }
+}
+
+.form {
+  padding: 16px 0;
+}
+
+.errorMessage {
+  color: #ff4d4f;
+  margin-bottom: 16px;
+}
+
+.submitButton {
+  margin-bottom: 0;
+} 

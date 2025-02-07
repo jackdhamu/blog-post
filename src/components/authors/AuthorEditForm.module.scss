@@ -1,0 +1,16 @@
+.formContainer {
+  max-width: 600px;
+  margin: 24px auto;
+  padding: 0 16px;
+
+  :global {
+    .ant-card-head-title {
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .ant-upload {
+      width: 100%;
+    }
+  }
+} 
