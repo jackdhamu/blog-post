@@ -29,19 +29,6 @@ const Navigation = () => {
     }
   }
 
-  const publicItems = [
-    {
-      key: '/login',
-      icon: <LoginOutlined />,
-      label: <Link to="/login">Login</Link>
-    },
-    {
-      key: '/signup',
-      icon: <UserOutlined />,
-      label: <Link to="/signup">Sign Up</Link>
-    }
-  ]
-
   const privateItems = [
     {
       key: '/',
@@ -68,12 +55,12 @@ const Navigation = () => {
 
   return (
     <Header className={styles.header}>
-      <div className={styles.logo}>Blog App</div>
+      <div className={styles.logo}>Mallow Blogs</div>
       <Menu
         theme="dark"
         mode="horizontal"
         selectedKeys={[location.pathname]}
-        items={isAuthenticated ? privateItems : publicItems}
+        items={isAuthenticated ? privateItems : []}
       />
     </Header>
   )
