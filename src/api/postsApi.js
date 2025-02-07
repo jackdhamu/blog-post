@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getAuthHeader } from './authUtils'
 
-const BASE_URL = 'http://3.110.167.175/api'
+const BASE_URL = 'https://stories.techzilla.site/api'
 
 export const postsApi = {
   // Get all posts with optional filters
