@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://3.110.167.175/api'
+const BASE_URL = 'https://stories.techzilla.site/api'
 
 export const authApi = {
   login: async (credentials) => {
