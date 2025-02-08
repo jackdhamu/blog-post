@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { List, Card, Button, Space, Select, message, Modal } from 'antd'
+import { Table, Button, Space, Select, message, Modal } from 'antd'
 import { LikeOutlined, LikeFilled, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  fetchPosts, 
-  deletePost, 
-  likePost, 
-  unlikePost, 
+import {
+  fetchPosts,
+  deletePost,
+  likePost,
+  unlikePost,
   setFilters
 } from '../../store/slices/postsSlice'
 import { getCurrentUser } from '../../store/slices/authSlice'
@@ -60,10 +60,12 @@ const PostsList = () => {
 
   const handleSortChange = (value) => {
     dispatch(setFilters({ sort: value }))
+    dispatch(fetchPosts({ ...filters, sort: value }))
   }
 
   const handleFilterChange = (value) => {
     dispatch(setFilters({ mine: value === 'mine' }))
+    dispatch(fetchPosts({ ...filters, mine: value === 'mine' }))
   }
 
   const handleCreateClick = () => {
@@ -81,111 +83,123 @@ const PostsList = () => {
     setEditingPost(null)
   }
 
-  return (
-    <div className={styles.postsContainer}>
-      <div className={styles.controls}>
-        <Space>
-          <Select
-            defaultValue="all"
-            value={filters.mine ? 'mine' : 'all'}
-            onChange={handleFilterChange}
-            className={styles.filterSelect}
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+      render: (text, post) => <Link to={`/posts/${post.id}`}>{text}</Link>
+    },
+    {
+      title: 'Content',
+      dataIndex: 'content',
+      key: 'content',
+      render: (text) => (
+          <p className={styles.postPreview}>
+            {text.length > 200 ? `${text.slice(0, 200)}...` : text}
+          </p>
+      )
+    },
+    {
+      title: 'Author',
+      dataIndex: ['user', 'name'],
+      key: 'author',
+      render: (text, post) => <Link to={`/authors/${post.user.id}`}>{text}</Link>
+    },
+    {
+      title: 'Likes',
+      dataIndex: 'likes_count',
+      key: 'likes_count',
+      render: (likes_count, post) => (
+          <Button
+              icon={post.is_liked ? <LikeFilled /> : <LikeOutlined />}
+              onClick={() => handleLikeToggle(post)}
+              disabled={isPostOwner(post)}
+              type={post.is_liked ? 'primary' : 'default'}
           >
-            <Option value="all">All Posts</Option>
-            <Option value="mine">My Posts</Option>
-          </Select>
-          <Select
-            value={filters.sort}
-            onChange={handleSortChange}
-            className={styles.sortSelect}
-          >
-            <Option value="created_at">Latest</Option>
-            <Option value="likes_count">Most Liked</Option>
-          </Select>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={handleCreateClick}
-          >
-            Create Post
+            {likes_count}
           </Button>
-        </Space>
-      </div>
-
-      <List
-        grid={{ gutter: 16, column: 1 }}
-        dataSource={posts}
-        loading={isLoading}
-        renderItem={(post) => (
-          <List.Item>
-            <Card
-              className={styles.postCard}
-              actions={[
-                <Button
-                  key="like"
-                  icon={post.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                  onClick={() => handleLikeToggle(post)}
-                  disabled={isPostOwner(post)}
-                  type={post.is_liked ? 'primary' : 'default'}
-                >
-                  {post.likes_count}
-                </Button>,
-                isPostOwner(post) && (
+      )
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (text, post) => (
+          <Space>
+            {isPostOwner(post) && (
+                <>
                   <Button
-                    key="edit"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEditClick(post)}
+                      icon={<EditOutlined />}
+                      onClick={() => handleEditClick(post)}
                   >
                     Edit
                   </Button>
-                ),
-                isPostOwner(post) && (
                   <Button
-                    key="delete"
-                    icon={<DeleteOutlined />}
-                    danger
-                    onClick={() => handleDelete(post.id)}
+                      icon={<DeleteOutlined />}
+                      danger
+                      onClick={() => handleDelete(post.id)}
                   >
                     Delete
                   </Button>
-                )
-              ].filter(Boolean)}
-            >
-              <Card.Meta
-                title={<Link to={`/posts/${post.id}`}>{post.title}</Link>}
-                description={
-                  <>
-                    <p className={styles.postPreview}>
-                      {post.content.length > 200 
-                        ? `${post.content.slice(0, 200)}...` 
-                        : post.content}
-                    </p>
-                    <p className={styles.postMeta}>
-                      By{' '}
-                      <Link to={`/authors/${post.user.id}`}>{post.user.name}</Link>
-                    </p>
-                  </>
-                }
-              />
-            </Card>
-          </List.Item>
-        )}
-      />
+                </>
+            )}
+          </Space>
+      )
+    }
+  ]
 
-      <Modal
-        title={editingPost ? 'Edit Post' : 'Create Post'}
-        open={modalVisible}
-        onCancel={handleModalClose}
-        footer={null}
-        width={800}
-      >
-        <PostForm
-          initialValues={editingPost}
-          onSuccess={handleModalClose}
+  return (
+      <div className={styles.postsContainer}>
+        <div className={styles.controls}>
+          <Space>
+            <Select
+                defaultValue="all"
+                value={filters.mine ? 'mine' : 'all'}
+                onChange={handleFilterChange}
+                className={styles.filterSelect}
+            >
+              <Option value="all">All Posts</Option>
+              <Option value="mine">My Posts</Option>
+            </Select>
+            <Select
+                value={filters.sort}
+                onChange={handleSortChange}
+                className={styles.sortSelect}
+            >
+              <Option value="created_at">Latest</Option>
+              <Option value="likes_count">Most Liked</Option>
+            </Select>
+            <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleCreateClick}
+            >
+              Create Post
+            </Button>
+          </Space>
+        </div>
+
+        <Table
+            columns={columns}
+            dataSource={posts}
+            loading={isLoading}
+            rowKey="id"
         />
-      </Modal>
-    </div>
+
+        <Modal
+            title={editingPost ? 'Edit Post' : 'Create Post'}
+            open={modalVisible}
+            onCancel={handleModalClose}
+            footer={null}
+            width={800}
+        >
+          <PostForm
+              initialValues={editingPost}
+              onSuccess={handleModalClose}
+          />
+        </Modal>
+      </div>
   )
 }
 
-export default PostsList 
+export default PostsList

@@ -8,7 +8,7 @@ export const fetchPosts = createAsyncThunk(
       const response = await postsApi.getAllPosts(filters)
       return response.data
     } catch (error) {
-      return rejectWithValue(error.error || 'Failed to fetch posts')
+      return rejectWithValue(error.response?.data || 'Failed to fetch posts')
     }
   }
 )
@@ -20,10 +20,7 @@ export const createPost = createAsyncThunk(
       const response = await postsApi.createPost(postData)
       return response.data
     } catch (error) {
-      if (error.errors) {
-        return rejectWithValue(error.errors)
-      }
-      return rejectWithValue(error.error || 'Failed to create post')
+      return rejectWithValue(error.response?.data || 'Failed to create post')
     }
   }
 )
@@ -35,10 +32,7 @@ export const updatePost = createAsyncThunk(
       const response = await postsApi.updatePost(postId, postData)
       return response.data
     } catch (error) {
-      if (error.errors) {
-        return rejectWithValue(error.errors)
-      }
-      return rejectWithValue(error.error || 'Failed to update post')
+      return rejectWithValue(error.response?.data || 'Failed to update post')
     }
   }
 )
@@ -50,7 +44,7 @@ export const deletePost = createAsyncThunk(
       await postsApi.deletePost(postId)
       return postId
     } catch (error) {
-      return rejectWithValue(error.error || 'Failed to delete post')
+      return rejectWithValue(error.response?.data || 'Failed to delete post')
     }
   }
 )
@@ -60,9 +54,9 @@ export const likePost = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const response = await postsApi.likePost(postId)
-      return { postId, ...response }
+      return { postId, ...response.data }
     } catch (error) {
-      return rejectWithValue(error.error || 'Failed to like post')
+      return rejectWithValue(error.response?.data || 'Failed to like post')
     }
   }
 )
@@ -72,9 +66,9 @@ export const unlikePost = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const response = await postsApi.unlikePost(postId)
-      return { postId, ...response }
+      return { postId, ...response.data }
     } catch (error) {
-      return rejectWithValue(error.error || 'Failed to unlike post')
+      return rejectWithValue(error.response?.data || 'Failed to unlike post')
     }
   }
 )
@@ -87,7 +81,6 @@ const postsSlice = createSlice({
     isLoading: false,
     error: null,
     filters: {
-      mine: false,
       author: null,
       sort: 'created_at',
       order: 'desc'
@@ -99,7 +92,6 @@ const postsSlice = createSlice({
     },
     clearFilters: (state) => {
       state.filters = {
-        mine: false,
         author: null,
         sort: 'created_at',
         order: 'desc'
@@ -118,7 +110,7 @@ const postsSlice = createSlice({
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.isLoading = false
-        state.items = action.payload.data
+        state.items = action.payload
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.isLoading = false
@@ -172,4 +164,4 @@ const postsSlice = createSlice({
 })
 
 export const { setFilters, clearFilters, clearError } = postsSlice.actions
-export default postsSlice.reducer 
+export default postsSlice.reducer
